@@ -3,7 +3,7 @@ from PyQt5.QtWidgets import *
 import os
 from PIL.ImageFilter import *
 from PyQt5.QtGui import QPixmap, QImage
-from PIL import Image
+from PIL import Image, ImageFilter, ImageEnhance
 
 
 def pil2pixmap(im):
@@ -50,7 +50,10 @@ left_btn = QPushButton("Вліво")
 right_btn = QPushButton("Вправо")
 mirror_btn = QPushButton("Дзеркало")
 sharpness_btn = QPushButton("Різкість")
-whiteandblack_btn = QPushButton("Ч/Б")
+rozmitya_btn = QPushButton("Розмиття")
+blachwhite_btn = QPushButton("Ч/Б")
+k_btn = QPushButton("Контрастність")
+n_btn = QPushButton("Насиченість")
 files_list = QListWidget()
 photo = QLabel("спуйк")
 
@@ -58,6 +61,7 @@ main_line = QHBoxLayout()
 v1 = QVBoxLayout()
 v2 = QVBoxLayout()
 h1 = QHBoxLayout()
+h2 = QHBoxLayout()
 
 main_line.addLayout(v1)
 main_line.addLayout(v2)
@@ -66,13 +70,18 @@ v1.addWidget(files_list)
 
 v2.addWidget(photo)
 v2.addLayout(h1)
+v2.addLayout(h2)
+
 
 h1.addWidget(left_btn)
 h1.addWidget(right_btn)
 h1.addWidget(mirror_btn)
 h1.addWidget(sharpness_btn)
-h1.addWidget(whiteandblack_btn)
+h1.addWidget(rozmitya_btn)
 
+h2.addWidget(blachwhite_btn)
+h2.addWidget(k_btn)
+h2.addWidget(n_btn)
 class WorkWithPhoto:
     def __init__(self):
         self.image = None
@@ -87,7 +96,31 @@ class WorkWithPhoto:
         pixel = pil2pixmap(self.image)
         photo.setPixmap(pixel)
 
+    def rozmitya(self):
+        self.image = self.image.filter(ImageFilter.BLUR)
+        self.show_image()
+    def sharpness(self):
+        self.image = ImageEnhance.Brightness(self.image).enhance(1.5)
+        self.show_image()
 
+    def mirror(self):
+        self.image =self.image.transpose(Image.FLIP_LEFT_RIGHT)
+        self.show_image()
+    def right(self):
+        self.image = self.image.transpose(Image.ROTATE_90)
+        self.show_image()
+    def left(self):
+        self.image = self.image.transpose(Image.ROTATE_270)
+        self.show_image()
+    def blachwhite(self):
+        self.image = self.image.convert("L")
+        self.show_image()
+    def k(self):
+        self.image = ImageEnhance.Contrast(self.image).enhance(1.7)
+        self.show_image()
+    def n(self):
+        self.image = ImageEnhance.Color(self.image).enhance(1.9)
+        self.show_image()
 work_with_photo = WorkWithPhoto()
 def show_directory():
     work_with_photo.folder = QFileDialog.getExistingDirectory()
@@ -99,12 +132,19 @@ def show_directory():
 
 papka_btn.clicked.connect(show_directory)
 def show_photo():
-    image_name =  files_list.currentItem().text()
+    image_name = files_list.currentItem().text()
     work_with_photo.image_name = image_name
     work_with_photo.load()
     work_with_photo.show_image()
 files_list.currentRowChanged.connect(show_photo)
-
+rozmitya_btn.clicked.connect(work_with_photo.rozmitya)
+sharpness_btn.clicked.connect(work_with_photo.sharpness)
+mirror_btn.clicked.connect(work_with_photo.mirror)
+right_btn.clicked.connect(work_with_photo.right)
+left_btn.clicked.connect(work_with_photo.left)
+blachwhite_btn.clicked.connect(work_with_photo.blachwhite)
+k_btn.clicked.connect(work_with_photo.k)
+n_btn.clicked.connect(work_with_photo.n)
 window.setLayout(main_line)
 window.show()
 app.exec()
